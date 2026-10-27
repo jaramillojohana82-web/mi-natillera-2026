@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0F172A" />
+  <title>Mi Natillera 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ENCABEZADO SUPERIOR -->
+  <header class="app-header">
+    <div>
+      <h1>🏦 Natillera 2026</h1>
+      <p id="subtitulo-estado">Conectando con Google Sheets...</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-sync" class="icon-btn" title="Actualizar datos">🔄</button>
+      <button id="btn-config-url" class="icon-btn" title="Configurar conexión">⚙️</button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="app-content">
+
+    <!-- PANTALLA 1: INICIO Y ARQUEO DE CAJA -->
+    <section id="tab-dashboard" class="tab-view active">
+      <div class="card hero-card">
+        <span class="card-label">✅ TOTAL DINERO DISPONIBLE HOY</span>
+        <h2 id="kpi-disponible">$0</h2>
+        <div class="bolsillos-grid">
+          <div class="bolsillo">
+            <span>💵 Efectivo</span>
+            <strong id="kpi-efectivo">$0</strong>
+          </div>
+          <div class="bolsillo">
+            <span>📱 Nequi</span>
+            <strong id="kpi-nequi">$0</strong>
+          </div>
+          <div class="bolsillo">
+            <span>🏦 Bancolombia</span>
+            <strong id="kpi-bancolombia">$0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="card kpi-box">
+          <span>🤝 Plata en la Calle (Cartera)</span>
+          <strong id="kpi-cartera" class="text-amber">$0</strong>
+        </div>
+        <div class="card kpi-box">
+          <span>💰 Capital Ahorrado (41 Activos)</span>
+          <strong id="kpi-ahorro" class="text-blue">$0</strong>
+        </div>
+        <div class="card kpi-box">
+          <span>📈 Bolsa Utilidades Brutas</span>
+          <strong id="kpi-utilidades-brutas" class="text-emerald">$0</strong>
+          <small id="kpi-detalle-bolsa">Intereses + Polla + Rifas</small>
+        </div>
+        <div class="card kpi-box">
+          <span>👩‍💼 Mi Comisión Admin (3%)</span>
+          <strong id="kpi-comision">$0</strong>
+        </div>
+      </div>
+
+      <div class="card highlight-card">
+        <div>
+          <span>🎯 GANANCIA IGUALITARIA POR SOCIO ACTIVO (÷ 41)</span>
+          <h3 id="kpi-ganancia-socio">$0</h3>
+          <small id="kpi-utilidad-neta">Utilidad Neta a Repartir: $0</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 2: REGISTRAR PAGO EN 3 TOQUES + RECIBO WHATSAPP -->
+    <section id="tab-caja" class="tab-view">
+      <div class="card">
+        <h2>➕ Registrar Pago en 3 Toques</h2>
+
+        <label class="field-label">1. Buscar Socio o Deudor Particular</label>
+        <input type="text" id="buscador-cliente-caja" class="input-lg" placeholder="🔍 Escribe el nombre (ej. Jorge, Daniel, Vanessa)..." />
+        <select id="select-cliente-caja" class="input-lg">
+          <option value="">-- Selecciona de la lista --</option>
+        </select>
+        <div id="resumen-cliente-seleccionado" class="client-mini-badge hidden"></div>
+
+        <label class="field-label">2. ¿Qué está pagando?</label>
+        <div class="chip-group" id="grupo-conceptos">
+          <button type="button" class="chip active" data-concepto="Ahorro">💰 Ahorro</button>
+          <button type="button" class="chip" data-concepto="Pago Polla">🎲 Polla ($5.000)</button>
+          <button type="button" class="chip" data-concepto="Pago Rifa Mensual">🎟️ Rifa ($9.000)</button>
+          <button type="button" class="chip" data-concepto="Pago Interés Préstamo">📊 Interés Préstamo</button>
+          <button type="button" class="chip" data-concepto="Abono Capital Préstamo">📉 Abono a Capital</button>
+        </div>
+
+        <!-- Selector dinámico de Mes de Rifa -->
+        <div id="bloque-mes-rifa" class="hidden">
+          <label class="field-label">Mes de la Rifa que paga</label>
+          <select id="select-mes-rifa" class="input-lg">
+            <option value="Enero">Enero</option>
+            <option value="Febrero">Febrero</option>
+            <option value="Marzo">Marzo</option>
+            <option value="Abril">Abril</option>
+            <option value="Mayo">Mayo</option>
+            <option value="Junio">Junio</option>
+            <option value="Julio">Julio</option>
+            <option value="Agosto">Agosto</option>
+            <option value="Septiembre">Septiembre</option>
+            <option value="Octubre" selected>Octubre</option>
+            <option value="Noviembre">Noviembre</option>
+            <option value="Diciembre">Diciembre</option>
+          </select>
+        </div>
+
+        <!-- Selector dinámico de Préstamo Activo -->
+        <div id="bloque-prestamo-ref" class="hidden">
+          <label class="field-label">Selecciona el Préstamo del Cliente</label>
+          <select id="select-prestamo-caja" class="input-lg"></select>
+          <div id="aviso-nuevo-interes" class="calc-alert hidden"></div>
+        </div>
+
+        <label class="field-label">Monto Recibido ($)</label>
+        <input type="number" id="input-monto-caja" class="input-lg monto-input" placeholder="Ej: 50000" inputmode="numeric" />
+
+        <label class="field-label">3. ¿Por dónde entró la plata?</label>
+        <div class="chip-group" id="grupo-medios">
+          <button type="button" class="chip active" data-medio="Efectivo">💵 Efectivo</button>
+          <button type="button" class="chip" data-medio="Nequi">📱 Nequi</button>
+          <button type="button" class="chip" data-medio="Bancolombia">🏦 Bancolombia</button>
+        </div>
+
+        <label class="field-label">📸 Comprobante Nequi/Bancolombia (Opcional - Sube a Drive)</label>
+        <input type="file" id="input-comprobante" accept="image/*" class="input-file" />
+
+        <label class="field-label">Observación (Opcional)</label>
+        <input type="text" id="input-obs-caja" class="input-lg" placeholder="Ej: Pago semana 42 / Abono parcial..." />
+
+        <button type="button" id="btn-guardar-pago" class="btn-primary">✅ Guardar Pago en Google Sheets</button>
+      </div>
+
+      <!-- TARJETA DE RECIBO WHATSAPP EN 1 CLIC -->
+      <div id="card-recibo-whatsapp" class="card whatsapp-card hidden">
+        <h3>🎉 ¡Pago Registrado con Éxito!</h3>
+        <p id="texto-preview-recibo"></p>
+        <button type="button" id="btn-enviar-whatsapp" class="btn-whatsapp">📲 Enviar Recibo por WhatsApp en 1 Clic</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 3: PRÉSTAMOS Y CALCULADORA INTELIGENTE -->
+    <section id="tab-prestamos" class="tab-view">
+      <div class="card">
+        <h2>🧮 Calculadora Inteligente y Nuevo Préstamo</h2>
+        <label class="field-label">Cliente (Socio o Particular)</label>
+        <input type="text" id="input-deudor-nuevo" class="input-lg" placeholder="Nombre del deudor..." />
+        
+        <div class="row-2col">
+          <div>
+            <label class="field-label">Monto a Prestar ($)</label>
+            <input type="number" id="input-monto-prestamo" class="input-lg" placeholder="Ej: 1000000" inputmode="numeric" />
+          </div>
+          <div>
+            <label class="field-label">Tasa Mensual</label>
+            <select id="select-tasa-prestamo" class="input-lg">
+              <option value="0.06" selected>6.0% General</option>
+              <option value="0.05">5.0% Preferencial</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="resultado-simulacion-prestamo" class="calc-alert">
+          Cuota de interés mensual estimada: <strong>$0 / mes</strong>
+        </div>
+
+        <label class="field-label">Sale del bolsillo de:</label>
+        <select id="select-medio-desembolso" class="input-lg">
+          <option value="Efectivo">💵 Efectivo</option>
+          <option value="Nequi">📱 Nequi</option>
+          <option value="Bancolombia">🏦 Bancolombia</option>
+        </select>
+
+        <button type="button" id="btn-crear-prestamo" class="btn-primary">🤝 Registrar Desembolso de Préstamo</button>
+      </div>
+
+      <div class="card">
+        <h2>📋 Cartera Viva ($32.3M al 6% y 5%)</h2>
+        <input type="text" id="buscador-prestamos" class="input-lg" placeholder="🔍 Filtrar deudor en cartera..." />
+        <div id="lista-prestamos" class="list-container"></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 4: SEMÁFORO DE RIFAS MENSUALES ($9.000) -->
+    <section id="tab-rifas" class="tab-view">
+      <div class="card">
+        <div class="rifas-header-row">
+          <h2>🎟️ Semáforo Rifa Mensual ($9.000)</h2>
+          <select id="select-mes-semaforo" class="input-lg">
+            <option value="0">Enero</option>
+            <option value="1">Febrero</option>
+            <option value="2">Marzo</option>
+            <option value="3">Abril</option>
+            <option value="4">Mayo</option>
+            <option value="5">Junio</option>
+            <option value="6">Julio</option>
+            <option value="7">Agosto</option>
+            <option value="8">Septiembre</option>
+            <option value="9" selected>Octubre</option>
+            <option value="10">Noviembre</option>
+            <option value="11">Diciembre</option>
+          </select>
+        </div>
+        <div id="resumen-mes-rifa" class="client-mini-badge"></div>
+        <div id="lista-semaforo-rifas" class="list-container"></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 5: DIRECTORIO DE 57 SOCIOS -->
+    <section id="tab-socios" class="tab-view">
+      <div class="card">
+        <h2>👥 Estado de Cuenta Socios (41 Activos / 16 Retirados)</h2>
+        <input type="text" id="buscador-socios" class="input-lg" placeholder="🔍 Buscar por nombre o # de boleta..." />
+        <div id="lista-socios" class="list-container"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL PARA PEGAR LA URL DE CONEXIÓN DE APPS SCRIPT -->
+  <div id="modal-url" class="modal hidden">
+    <div class="modal-box">
+      <h3>🔗 Conectar con tu Google Sheets</h3>
+      <p>Pega aquí la <strong>URL de la aplicación web</strong> que copiaste en Google Apps Script (termina en <code>/exec</code>):</p>
+      <input type="url" id="input-api-url" class="input-lg" placeholder="https://script.google.com/macros/s/.../exec" />
+      <div class="modal-actions">
+        <button type="button" id="btn-guardar-url" class="btn-primary">💾 Guardar y Conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA INFERIOR DE NAVEGACIÓN (5 BOTONES GRANDES) -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-target="tab-dashboard">
+      <span>📊</span><small>Caja</small>
+    </button>
+    <button class="nav-btn" data-target="tab-caja">
+      <span>➕</span><small>Registrar</small>
+    </button>
+    <button class="nav-btn" data-target="tab-prestamos">
+      <span>🤝</span><small>Préstamos</small>
+    </button>
+    <button class="nav-btn" data-target="tab-rifas">
+      <span>🎟️</span><small>Rifas</small>
+    </button>
+    <button class="nav-btn" data-target="tab-socios">
+      <span>👥</span><small>Socios</small>
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
